@@ -20,10 +20,10 @@ canvas{display:block;width:100%;height:auto;border-radius:16px;background:#111;t
 <div style="position:absolute;top:15px;width:100%;text-align:center;font-weight:1000">CITY → TUNNEL → NEW WORLD</div></div>
 <div style="text-align:center;font-weight:900;margin-top:10px">SPEED</div>
 <div id="speedPick" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px">
-<button class="btn spd green" data-spd="1" style="font-size:13px;padding:6px">1<br><small>Slow</small></button>
+<button class="btn spd green" data-spd="1" style="font-size:13px;padding:6px">1<br><small>Bilkul Slow</small></button>
 <button class="btn spd" data-spd="2" style="font-size:13px;padding:6px">2<br><small>Thora Tez</small></button>
 <button class="btn spd" data-spd="3" style="font-size:13px;padding:6px">3<br><small>Tez</small></button>
-<button class="btn spd" data-spd="4" style="font-size:13px;padding:6px">4<br><small>Super</small></button>
+<button class="btn spd" data-spd="4" style="font-size:13px;padding:6px">4<br><small>Super Tez</small></button>
 </div>
 <button id="play" class="btn green">▶ PLAY</button>
 <div class="worlds"><div class="world on">🌆<br>City</div><div class="world">🌳<br>Jungle</div><div class="world">🏜️<br>Desert</div><div class="world">❄️<br>Snow</div><div class="world">🌌<br>Space</div></div>
@@ -46,7 +46,7 @@ const worlds=[{name:'CITY',sky:['#54b9f5','#d8f1ff'],road:'#39434c',side:'#6b7a7
 {name:'SNOW',sky:['#86c9f4','#e8f6ff'],road:'#a8c4d6',side:'#e8f5ff',accent:'#58a5d4'},
 {name:'SPACE',sky:['#180b48','#5b24a0'],road:'#25225d',side:'#0c0927',accent:'#a843ff'}];
 function show(s){[menu,game,over].forEach(q=>q.classList.add('hidden'));s.classList.remove('hidden')}
-function reset(){run=true;last=0;distance=0;coinCount=0;speed=[0,6,7.5,9,11][speedChoice];lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=0;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function reset(){run=true;last=0;distance=0;coinCount=0;speed=[0,3.5,6.5,9,12][speedChoice];lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=0;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function hud(){$('#dist').textContent=Math.floor(distance)+' m';$('#coins').textContent='🪙 '+coinCount;$('#world').textContent=worlds[world].name}
 function roadX(y,l){const t=y/H,center=W/2,half=25+t*150;return center+(l-1)*half*.55}
 function projectY(z){return H-(z/700)*H}
@@ -64,7 +64,7 @@ function drawTunnel(){if(tunnel<=0)return;let a=Math.min(1,tunnel/90);x.fillStyl
 function runner(){let px=roadX(H*.82,lane),py=H*.80-jump;x.save();x.translate(px,py);x.font='54px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('🏃🏻',0,0);x.restore();return {x:px,y:py}}
 function shadow(r){let sy=Math.min(H-35,r.y+shadowGap);x.save();x.globalAlpha=.78;x.font='62px system-ui';x.textAlign='center';x.fillStyle='#000';x.fillText('👤',r.x,sy);x.restore();if(shadowGap<55){x.fillStyle='#ff3434';x.beginPath();x.arc(r.x-10,sy-20,3,0,7);x.arc(r.x+10,sy-20,3,0,7);x.fill()}}
 function drawObjects(){for(const o of objects){let y=projectY(o.z),scale=.25+(y/H)*.85,px=roadX(y,o.lane);x.save();x.translate(px,y);x.scale(scale,scale);x.textAlign='center';x.textBaseline='middle';x.font='36px system-ui';if(o.type==='coin')x.fillText('🪙',0,0);else x.fillText(['🚧','🪨','📦'][o.kind],0,0);x.restore()}}
-function update(dt){let f=dt/16.67;distance+=speed*.12*f;const base=[0,6,7.5,9,11][speedChoice],cap=[0,12,14,16,19][speedChoice];speed=Math.min(cap,base+distance/(1100-100*speedChoice));spawn-=speed*f;if(spawn<=0){addObject();if(Math.random()<.28)objects.push({type:'coin',lane:Math.floor(Math.random()*3),z:760});spawn=145-Math.min(70,distance/15)}
+function update(dt){let f=dt/16.67;distance+=speed*.12*f;const base=[0,6,7.5,9,11][speedChoice],cap=[0,7,12,16,20][speedChoice];speed=Math.min(cap,base+distance/(1400-100*speedChoice));spawn-=speed*f;if(spawn<=0){addObject();if(Math.random()<.28)objects.push({type:'coin',lane:Math.floor(Math.random()*3),z:760});spawn=145-Math.min(70,distance/15)}
 if(jump>0||jumpV!==0){jump+=jumpV*f;jumpV-=1.05*f;if(jump<=0){jump=0;jumpV=0}}
 for(const o of objects)o.z-=speed*4.7*f;
 for(const o of objects){if(o.hit||o.z>95||o.z<20||o.lane!==lane)continue;o.hit=true;if(o.type==='coin'){coinCount++;}else if(jump<45){shadowGap-=38;$('#msg').textContent='Shadow qareeb aa gaya!';setTimeout(()=>{$('#msg').textContent=''},500)}}
