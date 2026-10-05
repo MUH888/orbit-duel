@@ -10,7 +10,7 @@
 </head>
 <body><main>
 <section id="menu" class="card">
-  <div class="title">BRICK BREAKER ⚽</div>
+  <div class="title">BRICK BREAKER 😂</div>
   <div class="sub">50 levels • 3 hearts • finger drag paddle</div>
   <div style="text-align:center;font-weight:900">Ball Speed</div>
   <div class="speed" id="speedMenu">
@@ -61,7 +61,7 @@ function build(){bricks=[];const cols=level>=40?8:level>=20?7:6,rows=Math.min(8,
 function resetBall(){paddle.w=Math.max(62,100-Math.floor((level-1)/10)*7);paddle.x=(W-paddle.w)/2;ball.x=W/2;ball.y=paddle.y-20;const m=mag(),a=.72;ball.vx=(Math.random()>.5?1:-1)*m*Math.cos(a);ball.vy=-Math.abs(m*Math.sin(a))}
 function hud(){$('#levelText').textContent='Level '+level;$('#scoreText').textContent='Score: '+score;$('#heartText').textContent='❤️'.repeat(hearts)+'♡'.repeat(3-hearts)}
 function start(n){clearTimeout(timer);level=Math.max(1,Math.min(50,n));score=0;hearts=3;paused=false;running=true;build();resetBall();$('#msg').textContent='';$('#pause').textContent='Pause';show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
-function soccer(){ctx.save();ctx.translate(ball.x,ball.y);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#111';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(0,0,3,0,Math.PI*2);ctx.fill();for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;ctx.beginPath();ctx.arc(Math.cos(a)*6,Math.sin(a)*6,1.8,0,Math.PI*2);ctx.fill()}ctx.restore()}
+function soccer(){ctx.save();ctx.font='22px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('😂',ball.x,ball.y+1);ctx.restore()}
 function draw(){const hue=(level*18)%360,g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,`hsl(${hue} 55% 18%)`);g.addColorStop(1,'#06101a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(const b of bricks){if(b.hp<=0)continue;ctx.fillStyle=b.color;ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeStyle='#ffffff66';ctx.strokeRect(b.x+.5,b.y+.5,b.w-1,b.h-1);if(b.hp>1){ctx.fillStyle='#0009';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,b.x+b.w/2,b.y+b.h/2)}}ctx.fillStyle='#fff';ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);ctx.fillStyle='#27b7ff';ctx.fillRect(paddle.x+8,paddle.y+3,Math.max(0,paddle.w-16),8);soccer();if(paused){ctx.fillStyle='#0008';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 30px system-ui';ctx.textAlign='center';ctx.fillText('PAUSED',W/2,H/2)}}
 function collide(b){return ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h}
 function step(){if(!running||paused)return;ball.x+=ball.vx;ball.y+=ball.vy;if(ball.x-ball.r<=0){ball.x=ball.r;ball.vx=Math.abs(ball.vx)}if(ball.x+ball.r>=W){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx)}if(ball.y-ball.r<=0){ball.y=ball.r;ball.vy=Math.abs(ball.vy)}if(ball.vy>0&&ball.y+ball.r>=paddle.y&&ball.y-ball.r<=paddle.y+paddle.h&&ball.x>=paddle.x&&ball.x<=paddle.x+paddle.w){ball.y=paddle.y-ball.r;const rel=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2),m=mag();ball.vx=rel*m*.95;ball.vy=-Math.sqrt(Math.max(3,m*m-ball.vx*ball.vx))}
