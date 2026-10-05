@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Ismail Brick Breaker</title>
+<style>
+:root{--bg:#07111f;--panel:#0d223b;--text:#fff;--muted:#b7c9df;--accent:#20c56b}*{box-sizing:border-box}body{margin:0;background:linear-gradient(#06101d,#0a1730);font-family:system-ui,Arial,sans-serif;color:var(--text);min-height:100vh;display:flex;justify-content:center}main{width:min(100%,460px);padding:12px}.card{background:#0b1e34;border:1px solid #264968;border-radius:20px;padding:14px;box-shadow:0 10px 30px #0006}.title{text-align:center;font-weight:1000;font-size:34px;line-height:1.05;margin:8px 0 4px}.sub{text-align:center;color:var(--muted);font-size:14px;margin:0 0 14px}.row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}.speed{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 12px}.btn{border:0;border-radius:12px;padding:12px 10px;min-height:48px;font-weight:900;background:#17314f;color:#fff}.btn.active{outline:3px solid #51d6ff;background:#17486a}.btn.green{background:#16b85d}.btn.blue{background:#1680d8}.btn.red{background:#db3948}.btn.wide{width:100%;font-size:18px;margin-top:8px}.hud{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;font-weight:900;margin-bottom:8px}.hud div:nth-child(2){text-align:center}.hud div:nth-child(3){text-align:right}canvas{display:block;width:100%;height:auto;background:#071624;border-radius:16px;border:1px solid #244763;touch-action:none}.small{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.grid button{min-height:44px}.msg{text-align:center;font-weight:1000;min-height:26px;margin-top:8px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+</style>
+</head>
+<body><main>
+<section id="menu" class="card">
+  <div class="title">BRICK BREAKER ⚽</div>
+  <div class="sub">50 levels • 3 hearts • finger drag paddle</div>
+  <div style="text-align:center;font-weight:900">Ball Speed</div>
+  <div class="speed" id="speedMenu">
+    <button class="btn" data-speed="1">1<br><small>Slow</small></button>
+    <button class="btn active" data-speed="2">2<br><small>Normal</small></button>
+    <button class="btn" data-speed="3">3<br><small>Fast</small></button>
+    <button class="btn" data-speed="4">4<br><small>Super</small></button>
+  </div>
+  <button id="play" class="btn green wide">▶ Play</button>
+  <button id="select" class="btn blue wide">▦ Level Select</button>
+</section>
+<section id="levels" class="card hidden">
+  <div class="row" style="justify-content:space-between;margin-bottom:10px"><b>Select Level</b><button id="back" class="btn">← Back</button></div>
+  <div id="levelGrid" class="grid"></div>
+  <div class="small">Level complete karne par next level unlock hota hai.</div>
+</section>
+<section id="game" class="card hidden">
+  <div class="hud"><div id="levelText">Level 1</div><div id="scoreText">Score: 0</div><div id="heartText">❤️❤️❤️</div></div>
+  <canvas id="c" width="360" height="560"></canvas>
+  <div class="msg" id="msg"></div>
+  <div style="text-align:center;font-weight:900;margin-top:4px">Ball Speed</div>
+  <div class="speed" id="speedGame">
+    <button class="btn" data-speed="1">1</button><button class="btn active" data-speed="2">2</button><button class="btn" data-speed="3">3</button><button class="btn" data-speed="4">4</button>
+  </div>
+  <div class="controls"><button id="left" class="btn">⬅ Left</button><button id="right" class="btn">Right ➡</button></div>
+  <div class="row" style="margin-top:8px"><button id="pause" class="btn">Pause</button><button id="menuBtn" class="btn red">Menu</button></div>
+  <div class="small">Mobile: game par finger left-right drag karo.</div>
+</section>
+<section id="end" class="card hidden" style="text-align:center">
+  <div id="endTitle" class="title" style="font-size:30px">GAME OVER</div>
+  <div id="endText" class="sub"></div>
+  <button id="retry" class="btn green wide">Try Again</button>
+  <button id="endSelect" class="btn blue wide">Level Select</button>
+  <button id="endMenu" class="btn wide">Main Menu</button>
+</section>
+</main>
+<script>
+(()=>{
+const $=s=>document.querySelector(s), menu=$('#menu'),levels=$('#levels'),game=$('#game'),end=$('#end'),canvas=$('#c'),ctx=canvas.getContext('2d');
+let level=1,maxUnlocked=Math.max(1,Number(localStorage.getItem('bbUnlocked')||1)),score=0,hearts=3,speedChoice=2,running=false,paused=false,raf=0,timer=0;
+const W=canvas.width,H=canvas.height,colors=['#ff5f57','#ffd43b','#43d17b','#3fb8ff','#9b6cff','#ff6ab0','#ff9c45'];
+const paddle={x:130,y:520,w:100,h:14}; const ball={x:180,y:485,r:9,vx:3,vy:-4}; let bricks=[];
+function show(s){[menu,levels,game,end].forEach(x=>x.classList.add('hidden'));s.classList.remove('hidden')}
+function setSpeed(n){speedChoice=Number(n);document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',Number(b.dataset.speed)===speedChoice)); if(running){const m=mag(),l=Math.hypot(ball.vx,ball.vy)||1;ball.vx=ball.vx/l*m;ball.vy=ball.vy/l*m}}
+function mag(){return [0,4,5.2,6.5,8][speedChoice]+Math.min(1.5,(level-1)*.025)}
+function seeded(a){const x=Math.sin(a*12.9898)*43758.5453;return x-Math.floor(x)}
+function build(){bricks=[];const cols=level>=40?8:level>=20?7:6,rows=Math.min(8,4+Math.floor((level-1)/8)),gap=5,pad=14,bw=(W-pad*2-gap*(cols-1))/cols,bh=22;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(level>3&&((r*cols+c+level)%11===0))continue;let hp=1;if(level>=18&&(r+c+level)%5===0)hp=2;if(level>=35&&(r*2+c+level)%7===0)hp=3;bricks.push({x:pad+c*(bw+gap),y:58+r*(bh+gap),w:bw,h:bh,hp,max:hp,color:colors[Math.floor(seeded(level*91+r*17+c*13)*colors.length)]})}}
+function resetBall(){paddle.w=Math.max(62,100-Math.floor((level-1)/10)*7);paddle.x=(W-paddle.w)/2;ball.x=W/2;ball.y=paddle.y-20;const m=mag(),a=.72;ball.vx=(Math.random()>.5?1:-1)*m*Math.cos(a);ball.vy=-Math.abs(m*Math.sin(a))}
+function hud(){$('#levelText').textContent='Level '+level;$('#scoreText').textContent='Score: '+score;$('#heartText').textContent='❤️'.repeat(hearts)+'♡'.repeat(3-hearts)}
+function start(n){clearTimeout(timer);level=Math.max(1,Math.min(50,n));score=0;hearts=3;paused=false;running=true;build();resetBall();$('#msg').textContent='';$('#pause').textContent='Pause';show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function soccer(){ctx.save();ctx.translate(ball.x,ball.y);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,ball.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#111';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(0,0,3,0,Math.PI*2);ctx.fill();for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;ctx.beginPath();ctx.arc(Math.cos(a)*6,Math.sin(a)*6,1.8,0,Math.PI*2);ctx.fill()}ctx.restore()}
+function draw(){const hue=(level*18)%360,g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,`hsl(${hue} 55% 18%)`);g.addColorStop(1,'#06101a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(const b of bricks){if(b.hp<=0)continue;ctx.fillStyle=b.color;ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeStyle='#ffffff66';ctx.strokeRect(b.x+.5,b.y+.5,b.w-1,b.h-1);if(b.hp>1){ctx.fillStyle='#0009';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.hp,b.x+b.w/2,b.y+b.h/2)}}ctx.fillStyle='#fff';ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);ctx.fillStyle='#27b7ff';ctx.fillRect(paddle.x+8,paddle.y+3,Math.max(0,paddle.w-16),8);soccer();if(paused){ctx.fillStyle='#0008';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 30px system-ui';ctx.textAlign='center';ctx.fillText('PAUSED',W/2,H/2)}}
+function collide(b){return ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h}
+function step(){if(!running||paused)return;ball.x+=ball.vx;ball.y+=ball.vy;if(ball.x-ball.r<=0){ball.x=ball.r;ball.vx=Math.abs(ball.vx)}if(ball.x+ball.r>=W){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx)}if(ball.y-ball.r<=0){ball.y=ball.r;ball.vy=Math.abs(ball.vy)}if(ball.vy>0&&ball.y+ball.r>=paddle.y&&ball.y-ball.r<=paddle.y+paddle.h&&ball.x>=paddle.x&&ball.x<=paddle.x+paddle.w){ball.y=paddle.y-ball.r;const rel=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2),m=mag();ball.vx=rel*m*.95;ball.vy=-Math.sqrt(Math.max(3,m*m-ball.vx*ball.vx))}
+for(const b of bricks){if(b.hp>0&&collide(b)){b.hp--;score+=10*b.max;ball.vy*=-1;hud();break}}
+if(bricks.every(b=>b.hp<=0)){running=false;cancelAnimationFrame(raf);maxUnlocked=Math.max(maxUnlocked,Math.min(50,level+1));localStorage.setItem('bbUnlocked',maxUnlocked);if(level===50){$('#endTitle').textContent='🏆 50 LEVELS COMPLETE!';$('#endText').textContent='Ab 1 se 50 tak koi bhi level choose kar sakte ho.';show(end)}else{$('#msg').textContent='LEVEL COMPLETE! ⭐';draw();timer=setTimeout(()=>start(level+1),1200)}return}
+if(ball.y-ball.r>H){hearts--;hud();if(hearts<=0){running=false;cancelAnimationFrame(raf);$('#endTitle').textContent='GAME OVER';$('#endText').textContent=`Level ${level} • Score ${score}`;show(end);return}$('#msg').textContent='1 heart kam';resetBall();setTimeout(()=>{if(running)$('#msg').textContent=''},700)}}
+function loop(){step();draw();if(running&&!paused)raf=requestAnimationFrame(loop)}
+function renderLevels(){const g=$('#levelGrid');g.innerHTML='';for(let i=1;i<=50;i++){const b=document.createElement('button');b.className='btn';b.textContent=i;b.disabled=i>maxUnlocked;b.style.opacity=b.disabled?'.35':'1';b.addEventListener('click',()=>start(i));g.appendChild(b)}}
+function openLevels(){cancelAnimationFrame(raf);running=false;renderLevels();show(levels)}
+function move(clientX){const r=canvas.getBoundingClientRect(),x=(clientX-r.left)*(W/r.width);paddle.x=Math.max(0,Math.min(W-paddle.w,x-paddle.w/2))}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);move(e.clientX)});canvas.addEventListener('pointermove',e=>{if(canvas.hasPointerCapture(e.pointerId))move(e.clientX)});
+let hold;function nudge(d){paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x+d*24))}function startHold(d){nudge(d);clearInterval(hold);hold=setInterval(()=>nudge(d),70)}function stopHold(){clearInterval(hold)}
+$('#left').addEventListener('pointerdown',()=>startHold(-1));$('#right').addEventListener('pointerdown',()=>startHold(1));['pointerup','pointercancel','pointerleave'].forEach(ev=>{$('#left').addEventListener(ev,stopHold);$('#right').addEventListener(ev,stopHold)});
+document.querySelectorAll('[data-speed]').forEach(b=>b.addEventListener('click',()=>setSpeed(b.dataset.speed)));$('#play').onclick=()=>start(1);$('#select').onclick=openLevels;$('#back').onclick=()=>show(menu);$('#menuBtn').onclick=()=>{cancelAnimationFrame(raf);running=false;show(menu)};$('#pause').onclick=()=>{paused=!paused;$('#pause').textContent=paused?'Resume':'Pause';cancelAnimationFrame(raf);if(!paused&&running)raf=requestAnimationFrame(loop);else draw()};$('#retry').onclick=()=>start(level);$('#endSelect').onclick=openLevels;$('#endMenu').onclick=()=>show(menu);setSpeed(2);draw();
+})();
+</script></body></html>
