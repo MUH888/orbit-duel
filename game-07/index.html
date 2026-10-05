@@ -26,7 +26,8 @@ canvas{display:block;width:100%;height:auto;border-radius:16px;background:#111;t
 <button class="btn spd" data-spd="4" style="font-size:13px;padding:6px">4<br><small>Super Tez</small></button>
 </div>
 <button id="play" class="btn green">▶ PLAY</button>
-<div class="worlds"><div class="world on">🌆<br>City</div><div class="world">🌳<br>Jungle</div><div class="world">🏜️<br>Desert</div><div class="world">❄️<br>Snow</div><div class="world">🌌<br>Space</div></div>
+<div style="text-align:center;font-weight:900;margin-top:12px">CHOOSE JAGA</div>
+<div class="worlds" id="worldPick"><button class="world on" data-world="0">🌆<br>City</button><button class="world" data-world="1">🌳<br>Jungle</button><button class="world" data-world="2">🏜️<br>Desert</button><button class="world" data-world="3">❄️<br>Snow</button><button class="world" data-world="4">🌌<br>Space</button></div>
 </div></section>
 <section id="game" class="hidden">
 <div class="hud"><div id="dist">0 m</div><div id="coins">🪙 0</div><div id="world">CITY</div></div>
@@ -39,14 +40,14 @@ canvas{display:block;width:100%;height:auto;border-radius:16px;background:#111;t
 <script>
 (()=>{
 const $=s=>document.querySelector(s),menu=$('#menu'),game=$('#game'),over=$('#over'),c=$('#c'),x=c.getContext('2d');
-const W=c.width,H=c.height;let run=false,raf=0,last=0,distance=0,coinCount=0,speed=6,lane=1,jump=0,jumpV=0,shadowGap=115,objects=[],spawn=0,world=0,tunnel=0,nextWorld=650,speedChoice=1;
+const W=c.width,H=c.height;let run=false,raf=0,last=0,distance=0,coinCount=0,speed=6,lane=1,jump=0,jumpV=0,shadowGap=115,objects=[],spawn=0,world=0,tunnel=0,nextWorld=650,speedChoice=1,startWorld=0;
 const worlds=[{name:'CITY',sky:['#54b9f5','#d8f1ff'],road:'#39434c',side:'#6b7a7d',accent:'#2d8dbe'},
 {name:'JUNGLE',sky:['#27784c','#9bd66c'],road:'#6c6652',side:'#164f2b',accent:'#54b948'},
 {name:'DESERT',sky:['#5ec7f0','#ffd480'],road:'#a77a4d',side:'#e0ae62',accent:'#d98735'},
 {name:'SNOW',sky:['#86c9f4','#e8f6ff'],road:'#a8c4d6',side:'#e8f5ff',accent:'#58a5d4'},
 {name:'SPACE',sky:['#180b48','#5b24a0'],road:'#25225d',side:'#0c0927',accent:'#a843ff'}];
 function show(s){[menu,game,over].forEach(q=>q.classList.add('hidden'));s.classList.remove('hidden')}
-function reset(){run=true;last=0;distance=0;coinCount=0;speed=[0,1.5,6.5,9,12][speedChoice];lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=0;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function reset(){run=true;last=0;distance=0;coinCount=0;speed=[0,1.5,6.5,9,12][speedChoice];lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=startWorld;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function hud(){$('#dist').textContent=Math.floor(distance)+' m';$('#coins').textContent='🪙 '+coinCount;$('#world').textContent=worlds[world].name}
 function roadX(y,l){const t=y/H,center=W/2,half=25+t*150;return center+(l-1)*half*.55}
 function projectY(z){return H-(z/700)*H}
@@ -76,6 +77,6 @@ if(shadowGap<=30){run=false;cancelAnimationFrame(raf);$('#result').textContent='
 function draw(){drawWorld();drawObjects();let r=runner();shadow(r);drawTunnel()}
 function loop(t){if(!last)last=t;let dt=Math.min(35,t-last);last=t;if(run){update(dt);draw();raf=requestAnimationFrame(loop)}}
 let sx=0,sy=0;c.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;c.setPointerCapture(e.pointerId)});c.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy)){lane=Math.max(0,Math.min(2,lane+(dx>0?1:-1)))}else if(jump===0){jumpV=14}});
-document.querySelectorAll('.spd').forEach(b=>b.addEventListener('click',()=>{speedChoice=Number(b.dataset.spd);document.querySelectorAll('.spd').forEach(q=>q.classList.remove('green'));b.classList.add('green')}));$('#play').onclick=reset;$('#retry').onclick=reset;$('#menuBtn').onclick=()=>{run=false;cancelAnimationFrame(raf);show(menu)};$('#overMenu').onclick=()=>show(menu);drawWorld();
+document.querySelectorAll('.spd').forEach(b=>b.addEventListener('click',()=>{speedChoice=Number(b.dataset.spd);document.querySelectorAll('.spd').forEach(q=>q.classList.remove('green'));b.classList.add('green')}));document.querySelectorAll('[data-world]').forEach(b=>b.addEventListener('click',()=>{startWorld=Number(b.dataset.world);world=startWorld;document.querySelectorAll('[data-world]').forEach(q=>q.classList.remove('on'));b.classList.add('on');drawWorld()}));$('#play').onclick=reset;$('#retry').onclick=reset;$('#menuBtn').onclick=()=>{run=false;cancelAnimationFrame(raf);show(menu)};$('#overMenu').onclick=()=>show(menu);drawWorld();
 })();
 </script></body></html>
