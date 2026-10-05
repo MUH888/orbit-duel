@@ -1,5 +1,5 @@
 [build]
-  publish = "brick-breaker"
+  publish = "endless-runner"
 
 [build.environment]
   NODE_VERSION = "22"
