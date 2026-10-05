@@ -1,0 +1,5 @@
+[build]
+  publish = "brick-breaker"
+
+[build.environment]
+  NODE_VERSION = "22"
