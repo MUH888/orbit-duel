@@ -32,14 +32,14 @@ canvas{display:block;width:100%;height:auto;border-radius:16px;background:#111;t
 <script>
 (()=>{
 const $=s=>document.querySelector(s),menu=$('#menu'),game=$('#game'),over=$('#over'),c=$('#c'),x=c.getContext('2d');
-const W=c.width,H=c.height;let run=false,raf=0,last=0,distance=0,coinCount=0,speed=7,lane=1,jump=0,jumpV=0,shadowGap=115,objects=[],spawn=0,world=0,tunnel=0,nextWorld=650;
+const W=c.width,H=c.height;let run=false,raf=0,last=0,distance=0,coinCount=0,speed=9,lane=1,jump=0,jumpV=0,shadowGap=115,objects=[],spawn=0,world=0,tunnel=0,nextWorld=650;
 const worlds=[{name:'CITY',sky:['#54b9f5','#d8f1ff'],road:'#39434c',side:'#6b7a7d',accent:'#2d8dbe'},
 {name:'JUNGLE',sky:['#27784c','#9bd66c'],road:'#6c6652',side:'#164f2b',accent:'#54b948'},
 {name:'DESERT',sky:['#5ec7f0','#ffd480'],road:'#a77a4d',side:'#e0ae62',accent:'#d98735'},
 {name:'SNOW',sky:['#86c9f4','#e8f6ff'],road:'#a8c4d6',side:'#e8f5ff',accent:'#58a5d4'},
 {name:'SPACE',sky:['#180b48','#5b24a0'],road:'#25225d',side:'#0c0927',accent:'#a843ff'}];
 function show(s){[menu,game,over].forEach(q=>q.classList.add('hidden'));s.classList.remove('hidden')}
-function reset(){run=true;last=0;distance=0;coinCount=0;speed=7;lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=0;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function reset(){run=true;last=0;distance=0;coinCount=0;speed=9;lane=1;jump=0;jumpV=0;shadowGap=115;objects=[];spawn=0;world=0;tunnel=0;nextWorld=650;show(game);hud();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function hud(){$('#dist').textContent=Math.floor(distance)+' m';$('#coins').textContent='🪙 '+coinCount;$('#world').textContent=worlds[world].name}
 function roadX(y,l){const t=y/H,center=W/2,half=25+t*150;return center+(l-1)*half*.55}
 function projectY(z){return H-(z/700)*H}
@@ -54,10 +54,10 @@ x.fillStyle=w.side;x.fillRect(0,H*.48,W,H*.52);x.fillStyle=w.road;x.beginPath();
 x.strokeStyle='#ffffff88';x.lineWidth=2;for(let l=0;l<2;l++){x.beginPath();x.moveTo(W/2+(l?1:-1)*12,H*.35);x.lineTo(W/2+(l?1:-1)*100,H);x.stroke()}
 }
 function drawTunnel(){if(tunnel<=0)return;let a=Math.min(1,tunnel/90);x.fillStyle='rgba(0,0,0,'+(0.82*a)+')';x.fillRect(0,0,W,H);x.strokeStyle='#b66d28';x.lineWidth=18;x.beginPath();x.arc(W/2,H*.52,W*.43,Math.PI,Math.PI*2);x.stroke();x.fillStyle='#ffd27a';x.font='bold 20px system-ui';x.textAlign='center';x.fillText('ENTER THE TUNNEL',W/2,70)}
-function runner(){let px=roadX(H*.82,lane),py=H*.80-jump;x.save();x.translate(px,py);x.font='50px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('🏃🏻',0,0);x.restore();return {x:px,y:py}}
+function runner(){let px=roadX(H*.82,lane),py=H*.80-jump;x.save();x.translate(px,py);x.font='54px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('🏃🏻',0,0);x.restore();return {x:px,y:py}}
 function shadow(r){let sy=Math.min(H-35,r.y+shadowGap);x.save();x.globalAlpha=.78;x.font='62px system-ui';x.textAlign='center';x.fillStyle='#000';x.fillText('👤',r.x,sy);x.restore();if(shadowGap<55){x.fillStyle='#ff3434';x.beginPath();x.arc(r.x-10,sy-20,3,0,7);x.arc(r.x+10,sy-20,3,0,7);x.fill()}}
 function drawObjects(){for(const o of objects){let y=projectY(o.z),scale=.25+(y/H)*.85,px=roadX(y,o.lane);x.save();x.translate(px,y);x.scale(scale,scale);x.textAlign='center';x.textBaseline='middle';x.font='36px system-ui';if(o.type==='coin')x.fillText('🪙',0,0);else x.fillText(['🚧','🪨','📦'][o.kind],0,0);x.restore()}}
-function update(dt){let f=dt/16.67;distance+=speed*.12*f;speed=Math.min(14,7+distance/850);spawn-=speed*f;if(spawn<=0){addObject();if(Math.random()<.28)objects.push({type:'coin',lane:Math.floor(Math.random()*3),z:760});spawn=145-Math.min(70,distance/15)}
+function update(dt){let f=dt/16.67;distance+=speed*.12*f;speed=Math.min(18,9+distance/650);spawn-=speed*f;if(spawn<=0){addObject();if(Math.random()<.28)objects.push({type:'coin',lane:Math.floor(Math.random()*3),z:760});spawn=145-Math.min(70,distance/15)}
 if(jump>0||jumpV!==0){jump+=jumpV*f;jumpV-=1.05*f;if(jump<=0){jump=0;jumpV=0}}
 for(const o of objects)o.z-=speed*4.7*f;
 for(const o of objects){if(o.hit||o.z>95||o.z<20||o.lane!==lane)continue;o.hit=true;if(o.type==='coin'){coinCount++;}else if(jump<45){shadowGap-=38;$('#msg').textContent='Shadow qareeb aa gaya!';setTimeout(()=>{$('#msg').textContent=''},500)}}
